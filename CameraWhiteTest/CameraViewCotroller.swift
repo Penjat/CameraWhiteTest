@@ -49,10 +49,10 @@ class CameraViewCotroller: UIViewController {
       
       
       
-      backCamera?.setWhiteBalanceModeLocked(with: AVCaptureDevice.WhiteBalanceGains(redGain: 0.0, greenGain: 0.0, blueGain: 0.0))
+//      backCamera?.setWhiteBalanceModeLocked(with: AVCaptureDevice.WhiteBalanceGains(redGain: 0.0, greenGain: 0.0, blueGain: 0.0))
       
       
-      print("current white balance is \(backCamera?.whiteBalanceMode.rawValue)")
+      
     }else{
       print("something went wrong")
     }
@@ -64,7 +64,16 @@ class CameraViewCotroller: UIViewController {
   }
   
   @IBAction func pressedTakePhoto(_ sender: Any) {
-    print("pressed take picture")
+    if let device = backCamera {
+      do {
+        try device.lockForConfiguration()
+        device.whiteBalanceMode = .continuousAutoWhiteBalance
+        print("current white balance is \(device.deviceWhiteBalanceGains)")
+      }catch{
+        print("error")
+      }
+    }
+    
   }
   
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -83,9 +92,16 @@ class CameraViewCotroller: UIViewController {
           //device.focusMode = .continuousAutoFocus
           device.focusMode = .autoFocus
           //device.focusMode = .locked
+          
           device.exposurePointOfInterest = focusPoint
           device.exposureMode = AVCaptureDevice.ExposureMode.continuousAutoExposure
+          
+          
+          let gains: AVCaptureDevice.WhiteBalanceGains = AVCaptureDevice.currentWhiteBalanceGains
+          backCamera?.setWhiteBalanceModeLocked(with: gains, completionHandler:nil)
+          
           device.unlockForConfiguration()
+          print("current white balance is \(backCamera?.deviceWhiteBalanceGains)")
         }
         catch {
           // just ignore
